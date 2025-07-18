@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Estudio de Radio</title>
+    <!-- Load Tailwind CSS for a fast and responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for font and background */
+        body {
+            font-family: 'Inter', sans-serif; /* Inter font for better readability */
+            background-color: #F0FFF0; /* Very light green/mint for the background */
+            display: flex;
+            flex-direction: column; /* Changed to column to stack elements vertically */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Occupy at least 100% of the viewport height */
+            margin: 0;
+            padding: 1rem; /* General padding to prevent content from touching edges */
+            box-sizing: border-box; /* Include padding and border in the total size */
+        }
+
+        /* New style for the main title outside the container */
+        .main-title {
+            font-family: 'Georgia', serif; /* Distinct font for the main title */
+            font-size: 3.5rem; /* Larger font size */
+            font-weight: 900; /* Extra bold */
+            color: #16A34A; /* Darker green color */
+            margin-bottom: 2rem; /* Space below the title */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle text shadow */
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Main game container */
+        .container {
+            background-color: #ffffff; /* White background */
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+            padding: 2.5rem; /* More padding */
+            max-width: 95%; /* Max width for large screens */
+            width: 850px; /* Fixed width for desktop, adjusts with max-width */
+            text-align: center;
+            border: 1px solid #D9F7D9; /* Subtle green-tinted border */
+        }
+        /* Individual game section */
+        .game-section {
+            margin-bottom: 2.5rem; /* More bottom margin */
+            padding: 2rem; /* More padding */
+            border: 1px solid #E6F7E6; /* Lighter green border */
+            border-radius: 1rem; /* Rounded corners */
+            background-color: #f9fafb; /* Almost white background for the section */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
+        }
+        /* Style for question content (flashcard or translation) */
+        .flashcard-content, .translation-question {
+            font-size: 1.75rem; /* Larger font */
+            font-weight: bold;
+            margin-bottom: 1.75rem; /* More bottom margin */
+            color: #2c3e50; /* Dark text color */
+            line-height: 1.4; /* Line spacing for readability */
+        }
+        /* Style for feedback message (correct/incorrect) */
+        .feedback {
+            margin-top: 1.25rem; /* More top margin */
+            font-size: 1.1rem; /* Slightly larger font */
+            font-weight: bold;
+            min-height: 1.8rem; /* Ensures minimum space for feedback */
+        }
+        /* Color for correct feedback */
+        .correct {
+            color: #059669; /* Darker green */
+        }
+        /* Color for incorrect feedback */
+        .incorrect {
+            color: #dc2626; /* Darker red */
+        }
+        /* Style for text input fields */
+        input[type="text"] {
+            padding: 0.85rem 1.25rem; /* More padding */
+            border: 2px solid #D9F7D9; /* Green-tinted border */
+            border-radius: 0.75rem; /* More rounded corners */
+            width: calc(100% - 2.5rem); /* Full width minus padding */
+            max-width: 450px; /* Max width for the input */
+            font-size: 1.1rem; /* Larger font */
+            text-align: center;
+            margin-bottom: 1.25rem; /* More bottom margin */
+            box-sizing: border-box; /* Include padding and border in the total size */
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50; /* Green border on focus */
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); /* Focus shadow */
+        }
+        /* Style for buttons */
+        button {
+            background-color: #4CAF50; /* Medium green */
+            color: white;
+            padding: 0.85rem 1.75rem; /* More padding */
+            border-radius: 0.75rem; /* More rounded corners */
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, transform 0.1s ease-out, box-shadow 0.3s ease-in-out;
+            margin: 0.6rem; /* More margin */
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 3D effect shadow */
+        }
+        button:hover {
+            background-color: #388E3C; /* Darker green on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+        }
+        button:active {
+            transform: translateY(1px); /* Slight "pressed" effect */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button:disabled {
+            background-color: #9CCC65; /* Lighter, softer green for disabled buttons */
+            cursor: not-allowed;
+            box-shadow: none; /* No shadow when disabled */
+        }
+
+        /* Style for game navigation buttons */
+        .nav-buttons {
+            margin-bottom: 1.8rem; /* More bottom margin */
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem; /* Increased gap between buttons */
+        }
+        .nav-buttons button {
+            background-color: #9CCC65; /* Lighter, softer green */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            margin: 0; /* Reset margin from general button style */
+        }
+        .nav-buttons button.active {
+            background-color: #228B22; /* Forest green for active button */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .nav-buttons button:hover:not(.active) {
+             background-color: #4CAF50; /* Medium green on hover for inactive */
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem; /* Adjust title size for small screens */
+            }
+            .container {
+                padding: 1.5rem;
+            }
+            .flashcard-content, .translation-question {
+                font-size: 1.35rem;
+            }
+            input[type="text"] {
+                width: 100%; /* Full width on small screens */
+                max-width: none;
+            }
+            button {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
+            }
+            .nav-buttons {
+                gap: 1rem; /* Smaller gap on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">Práctica de Radio Rescate Unimet</h1>
+    <div class="container">
+        <h2 class="text-3xl font-extrabold text-gray-700 mb-8">Juego de Estudio de Radio Comunicación</h2>
+
+        <!-- Navigation buttons between games -->
+        <div class="nav-buttons">
+            <button id="show-flashcards" class="active">Flashcards</button>
+            <button id="show-translation">Traducción</button>
+        </div>
+
+        <!-- Flashcards Game Section -->
+        <div id="flashcards-game" class="game-section">
+            <h2 class="text-2xl font-bold text-gray-700 mb-5">Flashcards</h2>
+            <div id="flashcard-display" class="flashcard-content"></div>
+            <input type="text" id="flashcard-answer" placeholder="Tu respuesta">
+            <div id="flashcard-feedback" class="feedback"></div>
+            <button id="check-flashcard">Comprobar</button>
+            <button id="next-flashcard">Siguiente Flashcard</button>
+        </div>
+
+        <!-- Translation Game Section -->
+        <div id="translation-game" class="game-section mt-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-5">Juego de Traducción</h2>
+            <div id="translation-question" class="translation-question"></div>
+            <input type="text" id="translation-answer" placeholder="Traduce a lenguaje de radio">
+            <div id="translation-feedback" class="feedback"></div>
+            <button id="check-translation">Comprobar</button>
+            <button id="next-translation">Siguiente Traducción</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Data ---
+
+        // Radio codes obtained from your image
+        const radioCodes = {
+            1: "EMERGENCIA CON PRIORIDAD", 2: "TOME EL MANDO COMO ESTACION", 3: "TOMAS LAS ESTACIONES",
+            4: "PERSONA EXTRAVIADA", 5: "COPADO", 6: "EN SINTONIA", 7: "FUERA DE SINTONIA",
+            8: "ME TRASLADO A", 9: "LUGAR DONDE SE ENCUENTRA", 10: "LLAMADA TELEFONICA",
+            11: "PERMISO DE LA CENTRAL PARA SALIR DE/CON/ESTA ESTACION", 12: "MENSAJE O NOVEDAD",
+            13: "ME INFORME", 14: "SIN NOVEDAD / SIN MENSAJE", 15: "IDENTIFIQUE ESTACION",
+            16: "NUMERO DE PERSONAS", 17: "NOMBRE DE LA PERSONA O TRANSMITE",
+            18: "INFORME COPIA/COPIA", 19: "LO COPIO CON DIFICULTAD", 20: "LO COPIO CLARO",
+            21: "UBICUESE MEJOR", 22: "REPITA SU TRANSMISION", 23: "ME ESTA USTED LLAMANDO",
+            24: "ENTREVISTA CON", 25: "UNIDAD IDENTIFICADA", 26: "SOLICITO COMISION DE BOMBEROS",
+            27: "SOLICITO COMISION DE AMBULANCIA", 28: "HERIDO", 29: "MUERTO", 30: "INFORME CONFIDENCIAL",
+            31: "INCENDIO DE VEGETACION", 32: "INCENDIO URBANO (NO VEGETACION)",
+            33: "EXCURSIONISTA SIN PERMISO", 34: "EXCURSIONISTA EBRIO",
+            35: "CAZADORES EN LA ZONA", 36: "SE REQUIERE APOYO MEDICO",
+            37: "SOLICITO REFUERZO DE PERSONAL", 38: "SOLICITO COMIDA PARA EL PERSONAL",
+            39: "RETIRESE DEL SITIO", 40: "ABSTENERSE DE IR A", 41: "ESTACIONES EN LA ZONA",
+            42: "ALCANZA Y MOVIL DE", 43: "SOSPECHOSO EN LA ZONA",
+            44: "SE REQUIERE HELICOPTERO", 45: "SE REQUIERE AVIONETA", 46: "SE REQUIEREN PERITAJES",
+            47: "CORTANDO TODO RANCHOS", 48: "QUEMA O PIEZA FARRA/O",
+            49: "PROCEDIMIENTO NO ES DEL DESPACHO", 50: "REFORZADO EN LA ZONA",
+            51: "EFECTUAR EN PIERNA", 52: "SOLICITO COMISION DE",
+            53: "SOLICITO COMISION DE P.T.J.", 54: "SOLICITO COMISION DE DISP.",
+            55: "SOLICITO COMISION DE D.G.N.", 56: "ACCIDENTE DE TRANSITO",
+            57: "ACCIDENTE AEREO", 58: "RECORRIDO POR", 59: "HAGA FUENTE DE RADIO",
+            60: "PEDIR INFORMACION A ....", 61: "INUNDACION", 62: "DERRUMBE",
+            63: "CANAL EN BLANCO", 64: "UTILICE CORRECTAMENTE LA CLAVE DE TRANSMISION",
+            65: "BATERIA EN LA ZONA", 66: "CAMBIO DE FRECUENCIA",
+            67: "COMISION DE GRAS. Y/O INT.", 68: "MANTENGAME INFORMADO",
+            69: "NO PASE ESTE MENSAJE POR AQUI", 70: "NEGATIVO", 71: "BUENOS DIAS",
+            72: "BUENAS TARDES", 73: "BUENAS NOCHES", 74: "POSITIVO", 75: "GRACIAS"
+        };
+
+        // English phonetic alphabet
+        const phoneticAlphabetEnglish = {
+            'A': 'ALFA', 'B': 'BETA', 'C': 'CHARLIE', 'D': 'DELTA', 'E': 'ECHO',
+            'F': 'FOXTROT', 'G': 'GOLF', 'H': 'HOTEL', 'I': 'INDIA', 'J': 'JULIETT',
+            'K': 'KILO', 'L': 'LIMA', 'M': 'MIKE', 'N': 'NOVEMBER', 'O': 'OSCAR',
+            'P': 'PAPA', 'Q': 'QUEBEC', 'R': 'ROMEO', 'S': 'SIERRA', 'T': 'TANGO',
+            'U': 'UNIFORM', 'V': 'VICTOR', 'W': 'WHISKEY', 'X': 'X-RAY', 'Y': 'YANKEE',
+            'Z': 'ZULU'
+        };
+        const phoneticAlphabetEnglishReverse = {};
+        for (const [key, value] of Object.entries(phoneticAlphabetEnglish)) {
+            phoneticAlphabetEnglishReverse[normalizeText(value)] = key;
+        }
+
+        // Spanish phonetic alphabet (retained for translation game)
+        const phoneticAlphabetSpanish = {
+            'A': 'AMERICA', 'B': 'BRASIL', 'C': 'CANADA', 'D': 'DINAMARCA', 'E': 'ESPAÑA',
+            'F': 'FRANCIA', 'G': 'GUATEMALA', 'H': 'HOLANDA', 'I': 'ITALIA', 'J': 'JAPÓN',
+            'K': 'KILO', 'L': 'LIMA', 'M': 'MEXICO', 'N': 'NICARAGUA', 'O': 'ONTARIO',
+            'P': 'PORTUGAL', 'Q': 'QUITO', 'R': 'ROMA', 'S': 'SANTIAGO', 'T': 'TORONTO',
+            'U': 'URUGUAY', 'V': 'VENEZUELA', 'W': 'WASHINGTON', 'X': 'XILOFONO', 'Y': 'YUCATAN',
+            'Z': 'ZELANDIA'
+        };
+        const phoneticAlphabetSpanishReverse = {};
+        for (const [key, value] of Object.entries(phoneticAlphabetSpanish)) {
+            phoneticAlphabetSpanishReverse[normalizeText(value)] = key;
+        }
+
+        // Number pronunciation (retained for translation game)
+        const numberPronunciationOrdinal = {
+            '0': 'NEGATIVO', '1': 'PRIMERO', '2': 'SEGUNDO', '3': 'TERCERO', '4': 'CUARTO',
+            '5': 'QUINTO', '6': 'SEXTO', '7': 'SÉPTIMO', '8': 'OCTAVO', '9': 'NOVENO'
+        };
+        const numberPronunciationOrdinalReverse = {};
+        for (const [key, value] of Object.entries(numberPronunciationOrdinal)) {
+            numberPronunciationOrdinalReverse[normalizeText(value)] = key;
+        }
+
+        const numberPronunciationCardinal = {
+            '0': 'NEGATIVO', '1': 'UNO', '2': 'DOS', '3': 'TRES', '4': 'CUATRO',
+            '5': 'CINCO', '6': 'SEIS', '7': 'SIETE', '8': 'OCHO', '9': 'NUEVE'
+        };
+        const numberPronunciationCardinalReverse = {};
+        for (const [key, value] of Object.entries(numberPronunciationCardinal)) { // Corrected line: added 'of'
+            numberPronunciationCardinalReverse[normalizeText(value)] = key;
+        }
+
+        // List of common names for translation (retained for translation game)
+        const commonNames = [
+            "MARIA", "JUAN", "CARLOS", "ANA", "PEDRO", "SOFIA", "LUIS", "ELENA",
+            "MIGUEL", "LAURA", "JAVIER", "ISABEL", "DIEGO", "VALERIA", "ANDRES",
+            "CAMILA", "FERNANDO", "PAULA", "GABRIEL", "SARA"
+        ];
+
+        // Helper function to normalize text (remove accents, convert to lowercase, trim)
+        function normalizeText(text) {
+            return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        }
+
+        // --- Game Navigation Logic ---
+        const flashcardsGameSection = document.getElementById('flashcards-game');
+        const translationGameSection = document.getElementById('translation-game');
+        const showFlashcardsBtn = document.getElementById('show-flashcards');
+        const showTranslationBtn = document.getElementById('show-translation');
+
+        function showGame(gameId) {
+            if (gameId === 'flashcards') {
+                flashcardsGameSection.classList.remove('hidden');
+                translationGameSection.classList.add('hidden');
+                showFlashcardsBtn.classList.add('active');
+                showTranslationBtn.classList.remove('active');
+                generateFlashcard(); // Generate a new flashcard when shown
+            } else {
+                flashcardsGameSection.classList.add('hidden');
+                translationGameSection.classList.remove('hidden');
+                showFlashcardsBtn.classList.remove('active');
+                showTranslationBtn.classList.add('active');
+                generateTranslationQuestion(); // Generate a new translation question when shown
+            }
+        }
+
+        showFlashcardsBtn.addEventListener('click', () => showGame('flashcards'));
+        showTranslationBtn.addEventListener('click', () => showGame('translation'));
+
+        // --- Flashcards Game Logic ---
+        const flashcardDisplay = document.getElementById('flashcard-display');
+        const flashcardAnswerInput = document.getElementById('flashcard-answer');
+        const flashcardFeedback = document.getElementById('flashcard-feedback');
+        const checkFlashcardBtn = document.getElementById('check-flashcard');
+        const nextFlashcardBtn = document.getElementById('next-flashcard');
+
+        let currentFlashcard = null; // Stores the current flashcard
+
+        // Generates a new random flashcard
+        function generateFlashcard() {
+            flashcardAnswerInput.value = ''; // Clear the answer field
+            flashcardFeedback.textContent = ''; // Clear feedback
+            flashcardFeedback.className = 'feedback'; // Reset feedback class
+
+            // Randomly choose the type of flashcard (only codes and English phonetic alphabet - no word to letter English)
+            // 0: Code (number to description)
+            // 1: Code (description to number)
+            // 2: English Phonetic (letter to word)
+            const type = Math.floor(Math.random() * 3); // 0-2, 3 types of flashcards
+
+            if (type === 0) { // Code: number to description
+                const codes = Object.keys(radioCodes);
+                const randomIndex = Math.floor(Math.random() * codes.length);
+                const codeNum = codes[randomIndex];
+                currentFlashcard = {
+                    type: 'code-num-to-desc',
+                    question: `Código: ${codeNum}`,
+                    answer: radioCodes[codeNum]
+                };
+            } else if (type === 1) { // Code: description to number
+                const descriptions = Object.values(radioCodes);
+                const randomIndex = Math.floor(Math.random() * descriptions.length);
+                const codeDesc = descriptions[randomIndex];
+                const codeNum = Object.keys(radioCodes).find(key => radioCodes[key] === codeDesc);
+                currentFlashcard = {
+                    type: 'code-desc-to-num',
+                    question: `Significado: "${codeDesc}"`,
+                    answer: codeNum
+                };
+            } else { // type === 2: Phonetic: letter to word (English only)
+                const alphabet = phoneticAlphabetEnglish;
+                const letters = Object.keys(alphabet);
+                const randomIndex = Math.floor(Math.random() * letters.length);
+                const letter = letters[randomIndex];
+                currentFlashcard = {
+                    type: 'phonetic-letter-to-word',
+                    question: `Letra: "${letter}" (Alfabeto Inglés)`,
+                    answer: alphabet[letter]
+                };
+            }
+            flashcardDisplay.textContent = currentFlashcard.question;
+        }
+
+        // Checks the flashcard answer
+        function checkFlashcard() {
+            if (!currentFlashcard) return;
+
+            const userAnswer = normalizeText(flashcardAnswerInput.value);
+            const correctAnswer = normalizeText(currentFlashcard.answer.toString()); // Convert to string for normalization
+
+            if (userAnswer === correctAnswer) {
+                flashcardFeedback.textContent = '¡Correcto!';
+                flashcardFeedback.classList.add('correct');
+                return true; // Returns true if correct
+            } else {
+                flashcardFeedback.textContent = `Incorrecto. La respuesta correcta es: ${currentFlashcard.answer}`;
+                flashcardFeedback.classList.add('incorrect');
+                return false; // Returns false if incorrect
+            }
+        }
+
+        // Assigns events to buttons and input
+        checkFlashcardBtn.addEventListener('click', checkFlashcard);
+        // Modification here: the "Next Flashcard" button now also checks the answer
+        nextFlashcardBtn.addEventListener('click', () => {
+            checkFlashcard(); // Check the current answer
+            generateFlashcard(); // Then generate the next flashcard
+        });
+        flashcardAnswerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkFlashcard();
+            }
+        });
+
+        // --- Translation Game Logic ---
+        const translationQuestionDisplay = document.getElementById('translation-question');
+        const translationAnswerInput = document.getElementById('translation-answer');
+        const translationFeedback = document.getElementById('translation-feedback');
+        const checkTranslationBtn = document.getElementById('check-translation');
+        const nextTranslationBtn = document.getElementById('next-translation');
+
+        let currentTranslation = null; // Stores the current translation question
+
+        // Helper function to translate text to radio language for the translation game
+        // Uses the Spanish phonetic alphabet and cardinal pronunciation for digits in sequences
+        function translateTextForTranslationGame(text) {
+            let translated = [];
+            // Split the input text by spaces to process words/numbers individually
+            const words = text.toUpperCase().split(' ');
+
+            words.forEach((word, index) => {
+                let wordParts = [];
+                let isNumber = /^\d+(\.\d+)?$/.test(word); // Check if it's a number (integer or decimal)
+
+                if (isNumber) {
+                    // Handle numbers, including decimals
+                    for (let i = 0; i < word.length; i++) {
+                        const char = word[i];
+                        if (char === '.') {
+                            wordParts.push('PUNTO');
+                        } else if (numberPronunciationCardinal[char]) {
+                            wordParts.push(numberPronunciationCardinal[char]);
+                        } else {
+                            wordParts.push(char); // Fallback for unexpected chars in number
+                        }
+                    }
+                } else {
+                    // Handle words (letters and other characters)
+                    for (let i = 0; i < word.length; i++) {
+                        const char = word[i];
+                        if (phoneticAlphabetSpanish[char]) {
+                            wordParts.push(phoneticAlphabetSpanish[char]);
+                        } else {
+                            wordParts.push(char); // Keep non-phonetic characters as is
+                        }
+                    }
+                }
+                translated.push(wordParts.join(' ')); // Join characters of a "word" or "number" with spaces
+
+                // Add "PAUSA" between words, but not after the last word
+                if (index < words.length - 1) {
+                    translated.push('PAUSA');
+                }
+            });
+            return translated.join(' ');
+        }
+
+        // Function to generate a random phone number
+        function generatePhoneNumber() {
+            let num = '';
+            // Generates a number of 7 to 10 digits, simulating common formats
+            const length = Math.floor(Math.random() * 4) + 7; // 7, 8, 9, or 10 digits
+            for (let i = 0; i < length; i++) {
+                num += Math.floor(Math.random() * 10).toString();
+            }
+            return num;
+        }
+
+        // Generates a new random translation question
+        function generateTranslationQuestion() {
+            translationAnswerInput.value = ''; // Clear the answer field
+            translationFeedback.textContent = ''; // Clear feedback
+            translationFeedback.className = 'feedback'; // Reset feedback class
+
+            // More types of translation questions
+            // 0: General phrase
+            // 1: Long number/coordinate
+            // 2: Frequency
+            // 3: Phrase with code and spelling
+            // 4: Simple scenario
+            // 5: Translate name
+            // 6: Translate phone number
+            const type = Math.floor(Math.random() * 7); // 0-6, 7 types of translation questions
+
+            let questionText;
+            let expectedAnswer;
+
+            if (type === 0) { // General phrase
+                const phrases = [
+                    "Mi ubicacion es A12",
+                    "Cambio a canal 5",
+                    "Necesito ayuda ahora",
+                    "El informe es confidencial",
+                    "Codigo 75 para todos",
+                    "Base Alfa 3",
+                    "Emergencia total",
+                    "Confirmar recepcion 01",
+                    "Contacto en zona 34",
+                    "Mensaje claro",
+                    "Repita transmision",
+                    "Unidad 25"
+                ];
+                questionText = phrases[Math.floor(Math.random() * phrases.length)];
+                expectedAnswer = translateTextForTranslationGame(questionText);
+            } else if (type === 1) { // Long number / coordinate
+                let numStr = '';
+                for (let i = 0; i < Math.floor(Math.random() * 5) + 4; i++) { // Generates between 4 and 8 digits
+                    numStr += Math.floor(Math.random() * 10).toString();
+                }
+                questionText = `Traduce el número: ${numStr}`;
+                expectedAnswer = translateTextForTranslationGame(numStr);
+            } else if (type === 2) { // Frequency
+                const frequencies = [
+                    "145.675 MHz",
+                    "462.550 MHz",
+                    "156.800 MHz",
+                    "27.185 MHz"
+                ];
+                questionText = `Traduce la frecuencia: ${frequencies[Math.floor(Math.random() * frequencies.length)]}`;
+                expectedAnswer = translateTextForTranslationGame(questionText);
+            } else if (type === 3) { // Phrase with code and spelling
+                const mixedPhrases = [
+                    "Unidad Bravo 7, informe confidencial",
+                    "Solicito apoyo médico, código 36",
+                    "Mensaje para estación Delta 9",
+                    "Emergencia con prioridad, código 1",
+                    "Persona extraviada, coordenadas 12.34"
+                ];
+                questionText = mixedPhrases[Math.floor(Math.random() * mixedPhrases.length)];
+                expectedAnswer = translateTextForTranslationGame(questionText);
+            } else if (type === 4) { // Simple scenario
+                const scenarios = [
+                    {
+                        question: "Estás en una emergencia. ¿Cómo reportarías 'Persona extraviada' y tu ubicación 'Bravo 7'?",
+                        answer: "CODIGO CUATRO PAUSA UNIDAD BRASIL SIETE"
+                    },
+                    {
+                        question: "Necesitas refuerzo de personal. ¿Cómo lo solicitarías usando el código y el alfabeto fonético para 'Alpha'?",
+                        answer: "SOLICITO REFUERZO DE PERSONAL PAUSA UNIDAD AMERICA"
+                    },
+                    {
+                        question: "Quieres confirmar la recepción de un mensaje. ¿Cómo dirías 'Lo copio claro'?",
+                        answer: "LO COPIO CLARO"
+                    },
+                    {
+                        question: "Hay un accidente de tránsito en tu zona. ¿Cómo lo reportarías usando el código?",
+                        answer: "CODIGO CINCUENTA Y SEIS"
+                    },
+                     {
+                        question: "Quieres decir que el cero se denomina como negativo",
+                        answer: "NEGATIVO"
+                    }
+                ];
+                const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+                questionText = scenario.question;
+                expectedAnswer = scenario.answer;
+            } else if (type === 5) { // Translate name
+                const nameToTranslate = commonNames[Math.floor(Math.random() * commonNames.length)];
+                questionText = `Deletrea el nombre: "${nameToTranslate}"`;
+                expectedAnswer = translateTextForTranslationGame(nameToTranslate);
+            } else { // type === 6: Translate phone number
+                const phoneNumber = generatePhoneNumber();
+                questionText = `Traduce el número de teléfono: ${phoneNumber}`;
+                // For phone numbers, it is usually said digit by digit with pauses
+                let translatedPhone = [];
+                for (let i = 0; i < phoneNumber.length; i++) {
+                    translatedPhone.push(numberPronunciationCardinal[phoneNumber[i]]);
+                    if (i < phoneNumber.length - 1) {
+                        translatedPhone.push('PAUSA'); // Small pause between digits
+                    }
+                }
+                expectedAnswer = translatedPhone.join(' ');
+            }
+
+            currentTranslation = {
+                question: questionText,
+                answer: expectedAnswer
+            };
+            translationQuestionDisplay.textContent = currentTranslation.question;
+        }
+
+        // Checks the translation answer
+        function checkTranslation() {
+            if (!currentTranslation) return;
+
+            const userAnswer = normalizeText(translationAnswerInput.value);
+            const correctAnswer = normalizeText(currentTranslation.answer);
+
+            if (userAnswer === correctAnswer) {
+                translationFeedback.textContent = '¡Correcto!';
+                translationFeedback.classList.add('correct');
+            } else {
+                translationFeedback.textContent = `Incorrecto. La respuesta correcta es: ${currentTranslation.answer}`;
+                translationFeedback.classList.add('incorrect');
+            }
+        }
+
+        // Assigns events to buttons and input
+        checkTranslationBtn.addEventListener('click', checkTranslation);
+        nextTranslationBtn.addEventListener('click', generateTranslationQuestion);
+        translationAnswerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkTranslation();
+            }
+        });
+
+        // Initialize the game by showing flashcards by default
+        showGame('flashcards');
+    </script>
+</body>
+</html>
